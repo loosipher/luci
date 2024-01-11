@@ -1,0 +1,7 @@
+bochs.txt
+bx_enh_dbg.ini
+*.bin
+*.img
+luci
+**/*.o
+**/*.d
