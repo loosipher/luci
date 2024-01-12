@@ -23,6 +23,7 @@ beginning:
 _start:
 	mov $0x07c0, %ax
 	mov %ax, %ds
+	jmp stack_top
 #
 #	Set up a minimal stack
 #
@@ -76,7 +77,6 @@ write:
 	mov $0x09, %ah
 	int $0x10			# print the character to screen
 	jmp write
-	
 write_end:
 
 	cli
