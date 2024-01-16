@@ -1,0 +1,3 @@
+menuentry "luci" {
+	multiboot /boot/luci
+}

@@ -7,25 +7,23 @@ CFLAGS ?=
 CFLAGS := $(CFLAGS) -g -O2 -ffreestanding -Wall -Wextra
 LIBS := -nostdlib -lgcc
 
-OBJS := boot/entry.o kernel/kmain.o
-LINK_LIST := $(OBJS) kernel/drivers/vga.o
+OBJS := boot/entry.o
+LINK_LIST := $(OBJS) kernel/kmain.o kernel/drivers/vga.o kernel/libc/libk.a kernel/arch/gdt.a
 
-.PHONY: all clean rebuild
+.PHONY: all clean rebuild iso
 .SUFFIXES: .c .S .o
 
 rebuild: clean all
+
+release: all
+	i686-elf-objcopy --only-keep-debug luci luci.sym
+	i686-elf-strip --strip-debug --strip-unneeded luci
 
 all: luci
 
 luci: $(OBJS) linker.ld
 	$(MAKE) -C kernel all
 	$(CC) -T linker.ld -o $@ $(CFLAGS) $(LINK_LIST) $(LIBS)
-	$(AS) boot/boot.S -o boot/boot.o
-	$(TGT)objcopy -O binary boot/boot.o boot.bin
-	dd if=/dev/zero of=loosipher.img bs=512 count=10000
-	mkfs.vfat -F12 loosipher.img
-	dd if=boot.bin of=loosipher.img skip=62 seek=62 bs=1 count=448 conv=notrunc
-	mcopy -i loosipher.img $@ ::/
 
 .S.o:
 	$(AS) $< -o $@
@@ -33,7 +31,13 @@ luci: $(OBJS) linker.ld
 .c.o:
 	$(CC) -MD -c $< -o $@ $(CFLAGS)
 
+iso: release
+	mkdir -p iso/boot/grub
+	cp luci iso/boot
+	cp grub.cfg iso/boot/grub
+	grub-mkrescue -o luci.iso iso
+
 clean:
-	rm -f loosipher.img luci boot.bin
+	rm -rf luci.iso luci.sym luci iso
 	find . -name '*.o' -delete
 	$(MAKE) -C kernel clean

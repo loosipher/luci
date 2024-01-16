@@ -5,3 +5,5 @@ bx_enh_dbg.ini
 luci
 **/*.o
 **/*.d
+**/*.a
+grub.cfg
