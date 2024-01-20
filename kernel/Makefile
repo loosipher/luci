@@ -3,7 +3,7 @@ CC := $(TGT)-gcc
 
 CFLAGS := -g -O2 -ffreestanding -Wall -Wextra
 OBJS := drivers/vga.o
-INCLUDE := -Ilibc/include -Idrivers -Iarch -lk -lgcc
+INCLUDE := -Ilibc/include -Idrivers -Iarch
 
 
 .SUFFIXES: .c .o

@@ -11,14 +11,13 @@
 .section .bss
 .align 16
 stack_bottom:
-	.skip 1024*16
+	.skip 1024*8
 stack_top:
 
 .text
 .global _start
 _start:
-	xchg %bx, %bx	# breakpoint for bochs
-	call kmain
 	cli
+	call kmain
 1:	hlt
 	jmp 1b

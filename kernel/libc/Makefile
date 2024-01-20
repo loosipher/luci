@@ -1,7 +1,7 @@
 CC := i686-elf-gcc
 AR := i686-elf-ar
 
-OBJS := include/stdlib.o include/stdint.o include/stddef.o
+OBJS := include/stdlib.o include/stdint.o include/stddef.o include/stdio.o
 BINARIES := libk.a
 LIBK_OBJS := $(OBJS:.o=.libk.o)
 

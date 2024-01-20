@@ -1,14 +1,13 @@
 TGT ?= i686-elf-
 AS := $(TGT)as
 CC := $(TGT)gcc
-STRIP := $(TGT)strip
 
 CFLAGS ?=
 CFLAGS := $(CFLAGS) -g -O2 -ffreestanding -Wall -Wextra
 LIBS := -nostdlib -lgcc
 
 OBJS := boot/entry.o
-LINK_LIST := $(OBJS) kernel/kmain.o kernel/drivers/vga.o kernel/libc/libk.a kernel/arch/gdt.a
+LINK_LIST := $(OBJS) kernel/kmain.o kernel/drivers/vga.o kernel/libc/libk.a kernel/arch/gdt.a kernel/arch/idt.a
 
 .PHONY: all clean rebuild iso
 .SUFFIXES: .c .S .o
@@ -16,8 +15,8 @@ LINK_LIST := $(OBJS) kernel/kmain.o kernel/drivers/vga.o kernel/libc/libk.a kern
 rebuild: clean all
 
 release: all
-	i686-elf-objcopy --only-keep-debug luci luci.sym
-	i686-elf-strip --strip-debug --strip-unneeded luci
+	$(TGT)objcopy --only-keep-debug luci luci.sym
+	$(TGT)strip --strip-debug --strip-unneeded luci
 
 all: luci
 

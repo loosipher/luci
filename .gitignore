@@ -7,3 +7,4 @@ luci
 **/*.d
 **/*.a
 grub.cfg
+kernel/arch/x86/isr.c
