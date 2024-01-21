@@ -24,15 +24,15 @@ void kmain(void) {
 	printf("Loading IDT...\n");
 
 	// load the IDT
-	init_gates();
+	init_gates();				// initialize the IDT
 	for (int i = 0; i < 256; ++i) {
-		IDT_enable_gate(i);
+		IDT_enable_gate(i);		// enable each entry
 	}
-	lidt();
-	PIC_init();
-	outb(0xff, PIC1_DAT);
+	lidt();					// load the IDT
+	PIC_init();				// remap PIC
+	outb(0xfd, PIC1_DAT);			// mask PIC
 	outb(0xff, PIC2_DAT);
-	asm volatile ("sti");
+	asm volatile ("sti");			// enable interrupts
 	printf("IDT loaded.\n");
 	for (;;) asm volatile ("hlt");
 }

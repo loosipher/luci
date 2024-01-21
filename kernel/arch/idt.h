@@ -1,10 +1,12 @@
 #include <stdint.h>
 
+// macros useful for interacting with the PIC
 #define PIC1_CMD 0x20
 #define PIC1_DAT 0x21
 #define PIC2_CMD 0xa0
 #define PIC2_DAT 0xa1
 
+// constants for IDT flags
 typedef enum {
 	IDT_GATE_TASK		= 0x05,
 	IDT_GATE_16B_INT	= 0x06,

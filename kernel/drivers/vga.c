@@ -1,6 +1,8 @@
 #include "stdint.h"
 #include "stddef.h"
 
+
+// constants for VGA colors
 enum vga_color {
 	VC_BLACK  = 0,
 	VC_BLUE   = 1,
@@ -20,6 +22,7 @@ enum vga_color {
 	VC_WHITE  = 15
 };
 
+// structure to represent a character for VGA
 struct VGAByte {
 	uint8_t c;
 	uint8_t color;
@@ -27,15 +30,18 @@ struct VGAByte {
 
 static const size_t VGA_WIDTH = 80;
 static const size_t VGA_HEIGHT = 25;
-static size_t vga_x = 0;
+static size_t vga_x = 0;			// store position in buffer
 static size_t vga_y = 0;
-static uint8_t color = VC_BLACK<<4 | VC_GREEN;
+static uint8_t color = VC_BLACK<<4 | VC_LBROWN;
 static struct VGAByte* buffer = (struct VGAByte*) 0x0b8000;
 
+
+// create a VGA entry from a character and the saved color
 static inline struct VGAByte entry(char c) {
 	return (struct VGAByte) { c, color };
 }
 
+// clear the screen
 void clear(void) {
 	for (size_t y = 0; y < VGA_HEIGHT; y++) {
 		for (size_t x = 0; x < VGA_WIDTH; x++) {
@@ -44,6 +50,7 @@ void clear(void) {
 	}
 }
 
+// put one character on the screen
 void putc(char c) {
 	if (c == '\n') {
 		vga_x = 0;
@@ -59,8 +66,10 @@ void putc(char c) {
 	}
 }
 
+// print a string to the screen
 void puts(char* s) {
-	int b = (int) &s;
+	/* consider changing from this semi-black-magic  */
+	int b = (int) s;
 	while (*s != 0x00) {
 		putc(*(s++));
 	}

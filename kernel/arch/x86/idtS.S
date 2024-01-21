@@ -1,6 +1,4 @@
-# IDT stubs
-
-
+# IDT stub macros
 .macro ISR_NOEC it
 .global ISR_stub_\it
 ISR_stub_\it:
@@ -18,6 +16,7 @@ ISR_stub_\it:
 	iret
 .endm
 
+# create the exception handlers
 .text
 .altmacro
 
@@ -54,12 +53,15 @@ ISR_stub_\it:
 	ISR_EC   30
 	ISR_NOEC 31
 
+# create the remainder of the interrupt vectors
 .set i,32
 .rept 256-32
 	ISR_NOEC %i
 .set i,i+1
 .endr
 
+# the common handler that gets called by all vectors
+# sets up the environment for the handler
 isr_common:
 	pushal			# pushes edi, esi, ep esp, ebx, edx, ecx, eax
 
@@ -73,7 +75,7 @@ isr_common:
 	movw %ax, %gs
 
 	pushl %esp		# push pointer stack to C
-	call exception_handler	# call C program
+	call handler		# call C program
 	add $0x04, %esp
 
 	popl %eax		# restore previous data segments

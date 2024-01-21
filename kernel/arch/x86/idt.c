@@ -4,7 +4,10 @@
 #include <stdio.h>
 
 
+//
 // IDT structures
+// 
+// A single entry in a table
 static struct IdtEntry {
 	uint16_t offset_low;
 	uint16_t segment;
@@ -13,11 +16,50 @@ static struct IdtEntry {
 	uint16_t offset_high;
 } __attribute__((packed));
 
+// The pointer to the IDT
 static struct IdtPointer {
 	uint16_t limit;
 	uint32_t base;
 } __attribute__((packed));
 
+// the actual IDT and pointer
+static struct IdtEntry IDT[256];
+static struct IdtPointer IDT_ptr = (struct IdtPointer) {
+	sizeof(IDT)-1,
+	(uint32_t)&IDT
+};
+
+// add the entry to the IDT
+void IDT_set_gate(int i, void* base, uint16_t segment, uint8_t flags) {
+	uint32_t addr = (uint32_t)base;
+	IDT[i] = (struct IdtEntry) {
+		addr & 0xffff,
+		segment,
+		0x00,
+		flags,
+		(addr >> 16) & 0xffff
+	};
+}
+
+// set the present bit
+void IDT_enable_gate(int i) {
+	IDT[i].flags |= IDT_PRESENT;
+}
+// clear the present bit
+void IDT_disable_gate(int i) {
+	IDT[i].flags &= ~IDT_PRESENT;
+}
+
+// test call an interrupt
+void IDT_test(int i) {
+	uint32_t func_addr = ((uint32_t)IDT[i].offset_low) | ((uint32_t)IDT[i].offset_high << 16);
+	void (*func)(void) = (void (*)(void))func_addr;
+	func();
+}
+
+//
+// Interrupt/exception handler
+//
 // a structure that represents the registers as they are pushed by isr_common in idtS.S
 static struct RegisterInfo {
 	uint32_t ds;
@@ -36,17 +78,20 @@ static struct RegisterInfo {
 	uint32_t eflags;
 } __attribute__((packed));
 
+// stop execution in case of unrecoverable error
 __attribute__((noreturn))
 static void STOP() {
 	asm volatile ("cli; hlt");
 }
 
-static inline void eoi() {}
+static inline void eoi() { /* send the eoi command to let the pic know we're done processing the interrupt  */ }
+
+// just used for annotation
 static inline void deprecated() {}
 static inline void reserved() {}
 
 // the regular handler called by isr_common
-void exception_handler(struct RegisterInfo* regs) {
+void handler(struct RegisterInfo* regs) {
 	switch (regs->interrupt) {
 		case 0x00:
 			printf("Division error. #DE ~ No error code.\n");
@@ -201,40 +246,12 @@ void exception_handler(struct RegisterInfo* regs) {
 	}
 }
 
-static struct IdtEntry IDT[256];
-static struct IdtPointer IDT_ptr = (struct IdtPointer) {
-	sizeof(IDT)-1,
-	(uint32_t)&IDT
-};
-
-void IDT_set_gate(int i, void* base, uint16_t segment, uint8_t flags) {
-	uint32_t addr = (uint32_t)base;
-	IDT[i] = (struct IdtEntry) {
-		addr & 0xffff,
-		segment,
-		0x00,
-		flags,
-		(addr >> 16) & 0xffff
-	};
-}
-
-void IDT_enable_gate(int i) {
-	IDT[i].flags |= IDT_PRESENT;
-}
-void IDT_disable_gate(int i) {
-	IDT[i].flags &= ~IDT_PRESENT;
-}
-
-void IDT_test(int i) {
-	uint32_t func_addr = ((uint32_t)IDT[i].offset_low) | ((uint32_t)IDT[i].offset_high << 16);
-	void (*func)(void) = (void (*)(void))func_addr;
-	func();
-}
-
+// helper function to remap PIC
 static inline void wait(void) {
 	outb(0x80, 0);
 }
 
+// do the remapping of the PIC
 void PIC_init(void) {
 	outb(0x11, PIC1_CMD);	// initialization word
 	wait();
