@@ -4,7 +4,7 @@
 .macro ISR_NOEC it
 .global ISR_stub_\it
 ISR_stub_\it:
-	pushl $0xdeadbeef
+	pushl $0x0
 	pushl $\it
 	jmp isr_common
 	iret

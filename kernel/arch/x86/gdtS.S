@@ -2,6 +2,7 @@
 .global load_segments
 .type load_segments, @function
 load_segments:
+	pushl %eax
 	jmp $0x08, $.reload_cs
 .reload_cs:
 	movw $0x10, %ax
@@ -10,4 +11,5 @@ load_segments:
 	movw %ax, %fs
 	movw %ax, %gs
 	movw %ax, %ss
+	popl %eax
 	ret

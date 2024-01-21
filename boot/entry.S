@@ -19,5 +19,6 @@ stack_top:
 _start:
 	cli
 	call kmain
+	cli
 1:	hlt
 	jmp 1b

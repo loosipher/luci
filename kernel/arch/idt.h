@@ -22,4 +22,5 @@ void IDT_set_gate(int i, void* base, uint16_t segment, uint8_t flags);
 void IDT_enable_gate(int i);
 void IDT_disable_gate(int i);
 void IDT_test(int i);
+void PIC_init(void);
 void lidt(void);
