@@ -7,7 +7,7 @@ CFLAGS := $(CFLAGS) -g -O2 -ffreestanding -Wall -Wextra
 LIBS := -nostdlib -lgcc
 
 OBJS := boot/entry.o
-LINK_LIST := $(OBJS) kernel/kmain.o kernel/drivers/vga.o kernel/libc/libk.a kernel/arch/gdt.a kernel/arch/idt.a
+LINK_LIST := $(OBJS) kernel/kmain.o kernel/arch/idt.a kernel/drivers/drivers.a kernel/libc/libk.a kernel/arch/gdt.a 
 
 .PHONY: all clean rebuild iso
 .SUFFIXES: .c .S .o

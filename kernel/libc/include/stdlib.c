@@ -5,3 +5,12 @@ void outb(unsigned char value, unsigned short int port) {
 			:"r"(value), "r"(port)
 			:);
 }
+
+unsigned char inb(unsigned short int port) {
+	unsigned char retval;
+	asm volatile ("inb  %1, %0"
+			:"=a"(retval)
+			:"Nd"(port)
+			:"memory");
+	return retval;
+}

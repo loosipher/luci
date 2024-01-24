@@ -9,7 +9,7 @@ GDTOBJS := $(HOST)/gdt.o $(HOST)/gdtS.o
 IDTOBJS := $(HOST)/idt.o $(HOST)/idtS.o $(HOST)/isr.o
 BINARIES := gdt.a idt.a
 CFLAGS := -g -O2 -ffreestanding -Wall -Wextra
-INCLUDE := -I../libc/include -I../drivers -lk
+INCLUDE := -I../libc/include -I../drivers -I.
 
 
 .SUFFIXES: .c .o .S

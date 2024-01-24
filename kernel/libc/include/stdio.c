@@ -1,4 +1,4 @@
-#include "../../drivers/vga.h"
+#include <vga/vga.h>
 #include "stdio.h"
 
 
@@ -58,6 +58,7 @@ void printf(const char* fmt, ...) {
 						break;
 					case 's':
 						puts((char*)*argp++);
+						break;
 					case 'd':
 						argp = print_number(argp, 10);
 						break;

@@ -1,4 +1,5 @@
-#include "../idt.h"
+#include "idt.h"
+#include <kbd/kbd.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -84,7 +85,9 @@ static void STOP() {
 	asm volatile ("cli; hlt");
 }
 
-static inline void eoi() { /* send the eoi command to let the pic know we're done processing the interrupt  */ }
+static inline void eoi() {
+	outb(0x20, 0x20);
+}
 
 // just used for annotation
 static inline void deprecated() {}
@@ -227,6 +230,15 @@ void handler(struct RegisterInfo* regs) {
 
 		case 0x1f:
 			reserved();
+			break;
+
+		// keyboard interrupt
+		case 0x21:
+			char code = inb(KBD_DAT);
+			struct Keypress kp = process_code(code);
+			if (kp.pressed) printf("%c", kp.ascii);
+			update_cursor();
+			eoi();
 			break;
 
 		default:

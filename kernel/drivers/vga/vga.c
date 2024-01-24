@@ -30,8 +30,8 @@ struct VGAByte {
 
 static const size_t VGA_WIDTH = 80;
 static const size_t VGA_HEIGHT = 25;
-static size_t vga_x = 0;			// store position in buffer
-static size_t vga_y = 0;
+static int16_t vga_x = 0;			// store position in buffer
+static int16_t vga_y = 0;
 static uint8_t color = VC_BLACK<<4 | VC_LBROWN;
 static struct VGAByte* buffer = (struct VGAByte*) 0x0b8000;
 
@@ -48,6 +48,31 @@ void clear(void) {
 			buffer[(y*VGA_WIDTH)+x] = entry(' ');
 		}
 	}
+	vga_x = 0;
+	vga_y = 0;
+}
+
+// disable cursor
+void disable_cursor(void) {
+	outb(0x0a, 0x03d4);
+	outb(0x20, 0x03d5);
+}
+
+// enable cursor
+void enable_cursor(void) {
+	outb(0x0a, 0x03d4);
+	outb((inb(0x03d5) & 0xc0) | 0x0, 0x03d5);
+	outb(0x0b, 0x03d4);
+	outb((inb(0x03d5) & 0xe0) | 0xf, 0x03d5);
+}
+
+// update cursor
+void update_cursor(void) {
+	short pos = (vga_y*VGA_WIDTH)+vga_x;
+	outb(0x0f, 0x03d4);
+	outb((char)(pos&0xff), 0x03d5);
+	outb(0x0e, 0x03d4);
+	outb((char)((pos>>8)&0xff), 0x03d5);
 }
 
 // put one character on the screen
@@ -55,6 +80,12 @@ void putc(char c) {
 	if (c == '\n') {
 		vga_x = 0;
 		vga_y = (vga_y+1)%VGA_HEIGHT;
+	}
+	else if (c == '\0') {}
+	else if (c == '\x08') {
+		--vga_x;
+		if (vga_x < 0) vga_x = 0;
+		buffer[(vga_y*VGA_WIDTH)+vga_x] = entry(' ');
 	}
 	else {
 		buffer[(vga_y*VGA_WIDTH)+vga_x] = entry(c);

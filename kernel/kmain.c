@@ -1,4 +1,4 @@
-#include "vga.h"
+#include <vga.h>
 #include <gdt.h>
 #include <idt.h>
 #include <isr.h>
@@ -8,13 +8,16 @@
 
 void kmain(void) {
 	// disable cursor
-	outb(0x0a, 0x3d4);
-	outb(0x20, 0x3d5);
+	disable_cursor();
 
 	clear();
 	// print some informational information
-	puts("Booted from GRUB.\n");
-	printf("Testing printf: 0x%x\n", 0xdeadbeef);
+	printf("Booted from GRUB.\n");
+	printf("Testing printf:\n");
+	printf("    Expecting deadbeef: %x\n", 0xdeadbeef);
+	printf("    Expecting c: %c\n", 'c');
+	printf("    Expecting sa: %s\n", "sa");
+    	printf("    Expecting 123: %d\n", 123);
 	printf("Loading GDT...\n");
 
 	// load the GDT
@@ -34,5 +37,7 @@ void kmain(void) {
 	outb(0xff, PIC2_DAT);
 	asm volatile ("sti");			// enable interrupts
 	printf("IDT loaded.\n");
+	enable_cursor();			// enable cursor
+	update_cursor();
 	for (;;) asm volatile ("hlt");
 }
